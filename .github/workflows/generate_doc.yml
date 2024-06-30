@@ -1,0 +1,27 @@
+name: Generate Kotlin
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  # This workflow contains a single job called "generate-data-classes"
+  generate-kotlin:
+  runs-on: ubuntu-latest
+
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Wire
+      run: curl -L https://github.com/square/wire/releases/download/vX.Y.Z/wire-compiler-X.Y.Z-linux-x86_64.zip -o wire-compiler.zip && unzip wire-compiler.zip
+
+    - name: Generate Kotlin classes
+      run: ./wire-compiler --kotlin-out=. --proto_path=proto/ src/main/proto/*.proto

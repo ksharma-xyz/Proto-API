@@ -8,6 +8,7 @@ message Pokemon {
   string name = 1;
   int32 pokedex_number = 2;
   repeated Type type = 3;
+  int32 maxHp = 4;
 
   enum Type {
     BUG = 0;
