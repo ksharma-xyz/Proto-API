@@ -1,2 +1,2 @@
 # API-Protos
-A Collection Protobuf files to be used by other repos for data layer. 
+This repo is a collection of Protobuf files that will be used as input for creating Kotlin classes for Android Project's Data Layer.
