@@ -21,34 +21,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: List directory structure before building
+        run: ls -R
+
       - name: Generate Protos
         run: ./gradlew generateProtos
+
+      - name: List directory structure after building
+        run: ls -R
+
+      - name: List generated Kotlin files for debugging
+        run: ls -R lib/build/generated/source/wire/
 
       - name: Upload generated Kotlin files
         uses: actions/upload-artifact@v4
         with:
           name: generated-kotlin-files
-          path: build/generated/source/wire/*.kt
+          path: lib/build/generated/source/wire/**/*.kt
 
-      - name: Push to separate repo (replace with your details)
+      - name: Push to 'ksharma-xyz/Kotlin-Proto' repo
         uses: actions/checkout@v4
         with:
-          repository: 'ksharma/Kotlin-Proto'  # Target repo
+          repository: 'ksharma-xyz/Kotlin-Proto'  # Target repo
           token: ${{ secrets.TOKEN }}  # Use secret for authentication
 
       - name: Configure Git
         run: |
           git config user.name 'Karan Sharma'
           git config user.email '55722391+ksharma-xyz@users.noreply.github.com'
-          git config --global init.defaultBranch <main>
-
+          git config --global init.defaultBranch main
       - name: Create a new branch
         run: |
           git checkout -b kotlin
+
+      - name: Create lib directory if not exists
+        run: mkdir -p lib
+
+      - name: Change to lib directory
+        run: cd lib
+
       - name: Create Commit
         run: |
           git add .
           git commit -m "Add generated Kotlin files from main project"
+        working-directory: lib
 
       - name: Push changes to target repo
         run: git push origin ${{ steps.checkout-target-repo.outputs.branch }}
+        working-directory: lib

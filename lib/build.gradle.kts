@@ -15,7 +15,16 @@ plugins {
 }
 
 wire {
-    kotlin {}
+    kotlin {
+        javaInterop = true
+        out = "$projectDir/build/generated/source/wire"
+    }
+    protoPath {
+        srcDir("src/main/proto")
+    }
+    sourcePath {
+        srcDir("src/main/proto")
+    }
 }
 
 repositories {
