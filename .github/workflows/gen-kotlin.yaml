@@ -8,6 +8,7 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
+    # types: [opened, synchronize, reopened, closed]
     branches: [ "main" ]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -47,25 +48,17 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name 'Karan Sharma'
-          git config user.email '55722391+ksharma-xyz@users.noreply.github.com'
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git config --global init.defaultBranch main
       - name: Create a new branch
         run: |
           git checkout -b kotlin
 
-      - name: Create lib directory if not exists
-        run: mkdir -p lib
-
-      - name: Change to lib directory
-        run: cd lib
-
       - name: Create Commit
         run: |
           git add .
           git commit -m "Add generated Kotlin files from main project"
-        working-directory: lib
 
       - name: Push changes to target repo
         run: git push origin ${{ steps.checkout-target-repo.outputs.branch }}
-        working-directory: lib
