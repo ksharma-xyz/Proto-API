@@ -21,12 +21,14 @@ jobs:
       - name: Generate Protos
         run: ./gradlew generateProtos
 
-      - name: List generated Kotlin files
-        id: list-kotlin-files
+      - name: Debug - List generated Kotlin files
         run: |
-          files=$(find lib/build/generated/source/wire/ -type f -name "*.kt")
-          echo "$files" > generated_files.txt
-          echo "KOTLIN_FILES=$(cat generated_files.txt)" >> $GITHUB_ENV
+          files=$(find lib/build/generated/source/wire/ -type f -name '*.kt')
+          echo "Found files:"
+          echo "$files"
+          joined_files=$(echo "$files" | paste -sd ",")
+          echo "KOTLIN_FILES=$joined_files" >> $GITHUB_ENV
+        shell: bash
 
       - name: Upload generated Kotlin files
         id: upload-gen-kotlin-files
@@ -59,11 +61,6 @@ jobs:
           git push origin $branch_name
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
 
-      - name: Setup Git
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
@@ -77,9 +74,6 @@ jobs:
             ### Description
             
             Automated PR to add generated Kotlin files from [Proto-API](https://github.com/ksharma-xyz/Proto-API)
-            
-            ### List of files added:
-            ${{ env.KOTLIN_FILES }}
             
             ### Config
             Configuration of the workflow is located in `.github/workflows/gen-kotlin.yaml`.
