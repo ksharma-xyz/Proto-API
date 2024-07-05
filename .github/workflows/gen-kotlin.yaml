@@ -22,14 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: List directory structure before building
-        run: ls -R
+      #- name: List directory structure before building
+      #  run: ls -R
 
       - name: Generate Protos
         run: ./gradlew generateProtos
 
-      - name: List directory structure after building
-        run: ls -R
+      #- name: List directory structure after building
+      #  run: ls -R
 
       - name: List generated Kotlin files for debugging
         run: ls -R lib/build/generated/source/wire/
@@ -51,12 +51,19 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git config --global init.defaultBranch main
+
       - name: Create a new branch
         run: |
           git checkout -b kotlin
 
+      - name: List directory structure before copying files
+        run: ls -R
+
       - name: Copy generated files to target repo
-        run: cp -r lib/build/generated/source/wire/* .
+        run: |
+          mkdir -p lib/build/generated/source/wire
+          cp -r ../Proto-API/lib/build/generated/source/wire/* lib/build/generated/source/wire/
+          ls -R lib/build/generated/source/wire/ || echo "Copy failed"
 
       - name: List directory structure after copying files
         run: ls -R
