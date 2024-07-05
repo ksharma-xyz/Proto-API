@@ -1,38 +1,31 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Generate Kotlin
 
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: [ "main" ]
   pull_request:
-    # types: [opened, synchronize, reopened, closed]
     branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  upload-kotlin-files:
+  generate-kotlin:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      #- name: List directory structure before building
-      #  run: ls -R
+      - name: List directory structure before building
+        run: ls -R
 
       - name: Generate Protos
         run: ./gradlew generateProtos
 
-      #- name: List directory structure after building
-      #  run: ls -R
+      - name: List directory structure after building
+        run: ls -R
 
       - name: List generated Kotlin files for debugging
-        run: ls -R lib/build/generated/source/wire/
+        run: ls -R lib/build/generated/source/wire/ || echo "Directory not found"
 
       - name: Upload generated Kotlin files
         uses: actions/upload-artifact@v4
@@ -40,11 +33,20 @@ jobs:
           name: generated-kotlin-files
           path: lib/build/generated/source/wire/**/*.kt
 
-      - name: Push to 'ksharma-xyz/Kotlin-Proto' repo
+      - name: Checkout target repo
         uses: actions/checkout@v4
         with:
-          repository: 'ksharma-xyz/Kotlin-Proto'  # Target repo
-          token: ${{ secrets.TOKEN }}  # Use secret for authentication
+          repository: 'ksharma-xyz/Kotlin-Proto'
+          token: ${{ secrets.TOKEN }}
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: generated-kotlin-files
+          path: ./generated
+
+      - name: List downloaded files
+        run: ls -R ./generated
 
       - name: Configure Git
         run: |
@@ -53,25 +55,40 @@ jobs:
           git config --global init.defaultBranch main
 
       - name: Create a new branch
-        run: |
-          git checkout -b kotlin
-
-      - name: List directory structure before copying files
-        run: ls -R
+        run: git checkout -b kotlin
 
       - name: Copy generated files to target repo
         run: |
-          mkdir -p lib/build/generated/source/wire
-          cp -r ../Proto-API/lib/build/generated/source/wire/* lib/build/generated/source/wire/
-          ls -R lib/build/generated/source/wire/ || echo "Copy failed"
-
-      - name: List directory structure after copying files
-        run: ls -R
+          mkdir -p kotlin
+          touch test.txt
+          cp -r ./generated/* kotlin/
+          ls -R kotlin/ || echo "Copy failed"
 
       - name: Create Commit
         run: |
           git add .
-          git commit -m "Add generated Kotlin files from main project"
+          git commit -m "Kotlin Files"
 
       - name: Push changes to target repo
-        run: git push origin ${{ steps.checkout-target-repo.outputs.branch }}
+        run: git push --set-upstream origin kotlin
+
+      - name: Verify pushed branch
+        run: |
+          git fetch
+          git checkout kotlin
+          git log -1
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.TOKEN }}
+          commit-message: "Add generated Kotlin files from ksharma-xyz/Proto-API"
+          branch: kotlin
+          title: "Add generated Kotlin files from main project"
+          body: "This PR adds the generated Kotlin files from the main project."
+          base: main
+          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          author: ksharma-xyz <55722391+ksharma-xyz@users.noreply.github.com>
+          signoff: false
+          delete-branch: false
+          draft: false
