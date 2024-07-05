@@ -55,6 +55,12 @@ jobs:
         run: |
           git checkout -b kotlin
 
+      - name: Copy generated files to target repo
+        run: cp -r lib/build/generated/source/wire/* .
+
+      - name: List directory structure after copying files
+        run: ls -R
+
       - name: Create Commit
         run: |
           git add .
