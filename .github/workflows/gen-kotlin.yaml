@@ -21,11 +21,25 @@ jobs:
       - name: Generate Protos
         run: ./gradlew generateProtos
 
-      - name: List directory structure after building
-        run: ls -R
-
       - name: List generated Kotlin files for debugging
-        run: ls -R lib/build/generated/source/wire/ || echo "Directory not found"
+        run: |
+          find lib/build/generated/source/wire/ -type f -name "*.kt" || echo "Directory not found"
+
+      - name: List generated Kotlin files
+        id: list-kotlin-files
+        run: |
+          files=$(find lib/build/generated/source/wire/ -type f -name "*.kt")
+          echo "$files" > generated_files.txt
+          echo "KOTLIN_FILES=$(cat generated_files.txt)" >> $GITHUB_ENV
+
+      - name: List generated Kotlin files
+        run: |
+          gen_files=$(find lib/build/generated/source/wire/ -type f -name "*.kt")
+          if [ -z "$gen_files" ]; then
+            echo "Directory not found or no files found"
+          else
+            echo "gen_files_list<<$gen_files"
+          fi
 
       - name: Upload generated Kotlin files
         uses: actions/upload-artifact@v4
@@ -45,14 +59,35 @@ jobs:
           name: generated-kotlin-files
           path: ./generated
 
+      - name: Get Unix Timestamp
+        id: get-timestamp
+        run: echo "TIMESTAMP=$(date +'%s')" >> $GITHUB_ENV
+
+      - name: Create Branch
+        run: |
+          timestamp=$(date +'%s')
+          branch_name="branch-${timestamp}"
+          git checkout -b $branch_name
+          git push origin $branch_name
+          echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.TOKEN }}
-          branch-suffix: timestamp
-          committer: Github Actions Bot <42103905+github-actions[bot]@users.noreply.github.com>
-          author: Github Actions Bot <42103905+github-actions[bot]@users.noreply.github.com>
-          commit-message: "Add generated Kotlin files $(date +'%Y-%m-%dT%H:%M:%S')"
-          title: "Add generated Kotlin files $(timestamp)"
-          body: "This PR adds the generated Kotlin files from the https://github.com/ksharma-xyz/Proto-API project."
+          branch: ${{ env.BRANCH_NAME }}
+          committer: Github Actions Bot <41898282+github-actions[bot]@users.noreply.github.com>
+          author: Github Actions Bot <41898282+github-actions[bot]@users.noreply.github.com>
+          commit-message: "Add generated Kotlin files ${{ env.TIMESTAMP }}"
+          title: "Add generated Kotlin files ${{ env.TIMESTAMP }}"
+          body: |
+            ### Description
+            
+            Automated PR to add generated Kotlin files from [Proto-API](https://github.com/ksharma-xyz/Proto-API)
+            
+            ### List of files added:
+            ${{ env.KOTLIN_FILES }}
+            
+            ### Config
+            Configuration of the workflow is located in `.github/workflows/gen-kotlin.yaml`.
           base: main
