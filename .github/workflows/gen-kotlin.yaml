@@ -45,50 +45,14 @@ jobs:
           name: generated-kotlin-files
           path: ./generated
 
-      - name: List downloaded files
-        run: ls -R ./generated
-
-      - name: Configure Git
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git config --global init.defaultBranch main
-
-      - name: Create a new branch
-        run: git checkout -b kotlin
-
-      - name: Copy generated files to target repo
-        run: |
-          mkdir -p kotlin
-          touch test.txt
-          cp -r ./generated/* kotlin/
-          ls -R kotlin/ || echo "Copy failed"
-
-      - name: Create Commit
-        run: |
-          git add .
-          git commit -m "Kotlin Files"
-
-      - name: Push changes to target repo
-        run: git push --set-upstream origin kotlin
-
-      - name: Verify pushed branch
-        run: |
-          git fetch
-          git checkout kotlin
-          git log -1
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.TOKEN }}
-          commit-message: "Add generated Kotlin files from ksharma-xyz/Proto-API"
-          branch: kotlin
-          title: "Add generated Kotlin files from main project"
-          body: "This PR adds the generated Kotlin files from the main project."
+          branch-suffix: timestamp
+          committer: Github Actions Bot <42103905+github-actions[bot]@users.noreply.github.com>
+          author: Github Actions Bot <42103905+github-actions[bot]@users.noreply.github.com>
+          commit-message: "Add generated Kotlin files $(date +'%Y-%m-%dT%H:%M:%S')"
+          title: "Add generated Kotlin files $(timestamp)"
+          body: "This PR adds the generated Kotlin files from the https://github.com/ksharma-xyz/Proto-API project."
           base: main
-          committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
-          author: ksharma-xyz <55722391+ksharma-xyz@users.noreply.github.com>
-          signoff: false
-          delete-branch: false
-          draft: false
