@@ -21,27 +21,17 @@ jobs:
       - name: Generate Protos
         run: ./gradlew generateProtos
 
-      - name: List generated Kotlin files for debugging
+      - name: Debug - List generated Kotlin files
         run: |
-          find lib/build/generated/source/wire/ -type f -name "*.kt" || echo "Directory not found"
-
-      - name: List generated Kotlin files
-        id: list-kotlin-files
-        run: |
-          files=$(find lib/build/generated/source/wire/ -type f -name "*.kt")
-          echo "$files" > generated_files.txt
-          echo "KOTLIN_FILES=$(cat generated_files.txt)" >> $GITHUB_ENV
-
-      - name: List generated Kotlin files
-        run: |
-          gen_files=$(find lib/build/generated/source/wire/ -type f -name "*.kt")
-          if [ -z "$gen_files" ]; then
-            echo "Directory not found or no files found"
-          else
-            echo "gen_files_list<<$gen_files"
-          fi
+          files=$(find lib/build/generated/source/wire/ -type f -name '*.kt')
+          echo "Found files:"
+          echo "$files"
+          joined_files=$(echo "$files" | paste -sd ",")
+          echo "KOTLIN_FILES=$joined_files" >> $GITHUB_ENV
+        shell: bash
 
       - name: Upload generated Kotlin files
+        id: upload-gen-kotlin-files
         uses: actions/upload-artifact@v4
         with:
           name: generated-kotlin-files
@@ -84,9 +74,6 @@ jobs:
             ### Description
             
             Automated PR to add generated Kotlin files from [Proto-API](https://github.com/ksharma-xyz/Proto-API)
-            
-            ### List of files added:
-            ${{ env.KOTLIN_FILES }}
             
             ### Config
             Configuration of the workflow is located in `.github/workflows/gen-kotlin.yaml`.
