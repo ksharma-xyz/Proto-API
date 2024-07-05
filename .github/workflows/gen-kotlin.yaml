@@ -21,10 +21,6 @@ jobs:
       - name: Generate Protos
         run: ./gradlew generateProtos
 
-      - name: List generated Kotlin files for debugging
-        run: |
-          find lib/build/generated/source/wire/ -type f -name "*.kt" || echo "Directory not found"
-
       - name: List generated Kotlin files
         id: list-kotlin-files
         run: |
@@ -32,16 +28,8 @@ jobs:
           echo "$files" > generated_files.txt
           echo "KOTLIN_FILES=$(cat generated_files.txt)" >> $GITHUB_ENV
 
-      - name: List generated Kotlin files
-        run: |
-          gen_files=$(find lib/build/generated/source/wire/ -type f -name "*.kt")
-          if [ -z "$gen_files" ]; then
-            echo "Directory not found or no files found"
-          else
-            echo "gen_files_list<<$gen_files"
-          fi
-
       - name: Upload generated Kotlin files
+        id: upload-gen-kotlin-files
         uses: actions/upload-artifact@v4
         with:
           name: generated-kotlin-files
@@ -70,6 +58,11 @@ jobs:
           git checkout -b $branch_name
           git push origin $branch_name
           echo "BRANCH_NAME=$branch_name" >> $GITHUB_ENV
+
+      - name: Setup Git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
