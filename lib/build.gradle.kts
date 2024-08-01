@@ -18,6 +18,9 @@ wire {
     kotlin {
         javaInterop = true
         out = "$projectDir/build/generated/source/wire"
+        rpcCallStyle = "suspending"
+        rpcRole = "client"
+        singleMethodServices = false
     }
     protoPath {
         srcDir("src/main/proto")
