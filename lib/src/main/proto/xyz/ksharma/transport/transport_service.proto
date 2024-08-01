@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package xyz.ksharma.transport;
+import "xyz/ksharma/transport/gtfs_realtime.proto";
+
+option java_package = "xyz.ksharma.transport";
+option java_outer_classname = "TransportService";
+
+service TransportService {
+  rpc GetSchedule(Empty) returns (xyz.ksharma.transport.FeedMessage);
+}
+
+message Empty {}
