@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package powerpuff;
+
+message PowerpuffGirl {
+  int32 id = 1;
+  string name = 2;
+  repeated Ability abilities = 3;
+
+  optional Type type = 4;
+
+  enum Ability {
+    UNKNOWN = 0;
+    SUPER_STRENGTH = 1;
+    FLIGHT = 2;
+    HEAT_VISION = 3;
+    SPEED = 4;
+    INVISIBILITY = 5;
+  }
+
+  enum Type {
+    BUBBLE = 0;
+    BLOSSOM = 1;
+    BUTTERCUP = 2;
+  }
+}
