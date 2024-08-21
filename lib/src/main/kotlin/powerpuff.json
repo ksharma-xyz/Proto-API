@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "name": "Bubble",
+  "type": "BUBBLE",
+  "abilities": [
+    "FLIGHT",
+    "SPEED"
+  ]
+}
