@@ -3,11 +3,12 @@ syntax = "proto3";
 package powerpuff;
 
 message PowerpuffGirl {
+
+  reserved 4;
+
   int32 id = 1;
   string name = 2;
   repeated Ability abilities = 3;
-
-  optional Type type = 4;
 
   enum Ability {
     UNKNOWN = 0;
@@ -16,11 +17,5 @@ message PowerpuffGirl {
     HEAT_VISION = 3;
     SPEED = 4;
     INVISIBILITY = 5;
-  }
-
-  enum Type {
-    BUBBLE = 0;
-    BLOSSOM = 1;
-    BUTTERCUP = 2;
   }
 }
